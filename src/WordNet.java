@@ -1,6 +1,10 @@
+
+
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.RedBlackBST;
+import edu.princeton.cs.algs4.Topological;
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,26 +49,14 @@ public class WordNet {
             count = id;
         }
         //System.out.println("Count: " + count);
-
-        hypernymGraph = new Digraph(count + 1);
-        In hypernymIn = new In(hypernyms);
-        while (hypernymIn.hasNextLine()) {
-            String line = hypernymIn.readLine();
-            String[] results = line.split(LINE_SEPERATOR);
-            int id = Integer.parseInt(results[0]);
-            for (int i = 1; i < results.length; i++) {
-                int hypernymId = Integer.parseInt(results[i]);
-                hypernymGraph.addEdge(id, hypernymId);
-            }
-        }
-        //System.out.println("graph V: " + hypernymGraph.V() + "; graph E: " + hypernymGraph.E());
+        hypernymGraph = digraphConstructAndCheck(hypernyms, count + 1);
 
         synsetSap = new SAP(hypernymGraph);
     }
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        return () -> synsetArr.iterator();
+        return synsetBST.keys();
     }
 
     // is the word a WordNet noun?
@@ -111,6 +103,47 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
         WordNet wordNet = new WordNet("synsets.txt", "hypernyms.txt");
+    }
+
+    private Digraph digraphConstructAndCheck(String hypernyms, int verticeCount) {
+        Digraph hypernymGraph = new Digraph(verticeCount);
+        int[] outArrowMark = new int[verticeCount];
+        In hypernymIn = new In(hypernyms);
+        while (hypernymIn.hasNextLine()) {
+            String line = hypernymIn.readLine();
+            String[] results = line.split(LINE_SEPERATOR);
+            int id = Integer.parseInt(results[0]);
+            for (int i = 1; i < results.length; i++) {
+                int hypernymId = Integer.parseInt(results[i]);
+                hypernymGraph.addEdge(id, hypernymId);
+                outArrowMark[id] = 1;
+            }
+        }
+        // Then check outArrowMark, there should be exactly only 1 zero left for rooted DAG.
+        int potentialRoot = -1;
+        for (int i = 0; i < outArrowMark.length; i++) {
+            if (outArrowMark[i] == 0) {
+                if (potentialRoot == -1) {
+                    potentialRoot = i;
+                } else {
+                    throw new IllegalArgumentException("Wordnet digraph have multiple roots");
+                }
+            }
+        }
+        if (potentialRoot == -1) {
+            throw new IllegalArgumentException("wordnet digraph has no root");
+        }
+        if (!(new Topological(hypernymGraph)).hasOrder()) {
+            throw new IllegalArgumentException("Wordnet digraph is not DAG");
+        }
+        BreadthFirstDirectedPaths bfdp = new BreadthFirstDirectedPaths(hypernymGraph.reverse(), potentialRoot);
+        //System.out.println("potential root: " + potentialRoot);
+        for (int i = 0; i < hypernymGraph.V(); i++) {
+            if (!bfdp.hasPathTo(i)) {
+                throw new IllegalArgumentException("Wordnet digraph root can not reach " + i);
+            }
+        }
+        return hypernymGraph;
     }
 
     private class Synset {
