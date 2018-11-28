@@ -1,12 +1,16 @@
 import edu.princeton.cs.algs4.Digraph;
-
-import java.util.TreeSet;
+import edu.princeton.cs.algs4.Stack;
 
 public class SAP {
 
-    Digraph mG;
+    private Digraph mG;
     private SapVertice[] sapVertices;
 
+    private static int teamVMark = -2;
+    private static int teamWMark = -3;
+
+    private boolean foundCommonAncestor = false;
+    private int ancestor = -1, length = -1;
 
     // constructor takes a digraph (not necessarily a DAG)
     // All methods time proportional to E+V,
@@ -31,9 +35,8 @@ public class SAP {
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        if (v < 0 || v >= mG.V() || w < 0 || w >= mG.V()) {
-            throw new IllegalArgumentException("Input arguments contains illegal item");
-        }
+        argumentCheckerVertice(v);
+        argumentCheckerVertice(w);
         if (processForTwoVertice(v, w)) {
             return length;
         } else {
@@ -43,9 +46,8 @@ public class SAP {
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        if (v < 0 || v >= mG.V() || w < 0 || w >= mG.V()) {
-            throw new IllegalArgumentException("Input arguments contains illegal item");
-        }
+        argumentCheckerVertice(v);
+        argumentCheckerVertice(w);
         if (processForTwoVertice(v, w)) {
             return ancestor;
         } else {
@@ -53,103 +55,11 @@ public class SAP {
         }
     }
 
-    private int ancestor = -1, length = -1;
-
-    private boolean processForTwoVertice(int v, int w) {
-        clearAdjListMarks();
-        if (v == w) {
-            ancestor = v;
-            length = 0;
-            return true;
-        }
-        TreeSet<Integer> neighbourV = new TreeSet<>();
-        for (int neighbour : mG.adj(v)) {
-            neighbourV.add(neighbour);
-        }
-        TreeSet<Integer> neighbourW = new TreeSet<>();
-        for (int neighbour : mG.adj(w)) {
-            neighbourW.add(neighbour);
-        }
-        sapVertices[v].mark(v, 0);
-        sapVertices[w].mark(w, 0);
-        int stepV = 1;
-        int stepW = 1;
-
-        while (!neighbourV.isEmpty() || !neighbourW.isEmpty()) {
-            // check neighbours
-            // do one round with v
-            for (int neighbour : neighbourV) {
-                if (sapVertices[neighbour].isMarked()) {
-                    if (sapVertices[neighbour].reachedby == v) {
-                        // ignore vertex marked by itself
-                    } else {
-                        // found ancestor, break;
-                        //System.out.println("" + v + "found " + neighbour);
-                        ancestor = neighbour;
-                        length = stepV + sapVertices[neighbour].reachedDistance;
-                        return true;
-                    }
-                } else {
-                    //System.out.println("" + v + " mark " + neighbour);
-                    sapVertices[neighbour].mark(v, stepV);
-                }
-            }
-            // do one round with w
-            for (int neighbour : neighbourW) {
-                if (sapVertices[neighbour].isMarked()) {
-                    if (sapVertices[neighbour].reachedby == w) {
-                        // ignore vertex marked by self
-                    } else {
-                        // found ancestor, break;
-                        //System.out.println("" + w + " found " + neighbour);
-                        ancestor = neighbour;
-                        length = stepW + sapVertices[neighbour].reachedDistance;
-                        return true;
-                    }
-                } else {
-                    //System.out.println("" + w + " mark " + neighbour);
-                    sapVertices[neighbour].mark(w, stepW);
-                }
-            }
-            // if not found, need to update the neighbour and step
-            TreeSet<Integer> tempNeighbour = new TreeSet<>();
-            for (int neighbour : neighbourV) {
-                for (int neighboursNeighbour : mG.adj(neighbour)) {
-                    //System.out.println("" + v + " after step " + stepV + " add : " + neighboursNeighbour);
-                    tempNeighbour.add(neighboursNeighbour);
-                }
-            }
-            neighbourV = tempNeighbour;
-            stepV++;
-            tempNeighbour = new TreeSet<>();
-            for (int neighbour : neighbourW) {
-                for (int neighboursNeighbour : mG.adj(neighbour)) {
-                    //System.out.println("" + w + " after step " + stepW + " add : " + neighboursNeighbour);
-                    tempNeighbour.add(neighboursNeighbour);
-                }
-            }
-            neighbourW = tempNeighbour;
-            stepW++;
-        }
-        return false;
-    }
-
-    private static int teamVMark = -2;
-    private static int teamWMark = -3;
-
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        for (int vItem : v) {
-            if (vItem < 0 || vItem >= mG.V()) {
-                throw new IllegalArgumentException("Input arguments contains illegal item");
-            }
-        }
-        for (int wItem : w) {
-            if (wItem < 0 || wItem >= mG.V()) {
-                throw new IllegalArgumentException("Input arguments contains illegal item");
-            }
-        }
-        if (processForTwoSets(v, w)) {
+        argumentCheckerVerticeSet(v);
+        argumentCheckerVerticeSet(w);
+        if (processForTwoIterables(v, w)) {
             return length;
         } else {
             return -1;
@@ -158,98 +68,104 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        for (int vItem : v) {
-            if (vItem < 0 || vItem >= mG.V()) {
-                throw new IllegalArgumentException("Input arguments contains illegal item");
-            }
-        }
-        for (int wItem : w) {
-            if (wItem < 0 || wItem >= mG.V()) {
-                throw new IllegalArgumentException("Input arguments contains illegal item");
-            }
-        }
-        if (processForTwoSets(v, w)) {
+        argumentCheckerVerticeSet(v);
+        argumentCheckerVerticeSet(w);
+        if (processForTwoIterables(v, w)) {
             return ancestor;
         } else {
             return -1;
         }
     }
 
-    private boolean processForTwoSets(Iterable<Integer> v, Iterable<Integer> w) {
-        clearAdjListMarks();
-
-        TreeSet<Integer> neighbourV = new TreeSet<>();
-        for (int neighbour : v) {
-            neighbourV.add(neighbour);
-            sapVertices[neighbour].mark(teamVMark, 0);
+    private boolean processForTwoVertice(int v, int w) {
+        if (v == w) {
+            ancestor = v;
+            length = 0;
+            return true;
         }
-        TreeSet<Integer> neighbourW = new TreeSet<>();
-        for (int neighbour : w) {
-            neighbourW.add(neighbour);
-            if (sapVertices[neighbour].isMarked()) {
-                if (sapVertices[neighbour].reachedby == teamVMark) {
-                    ancestor = neighbour;
-                    length = 0;
-                    return true;
+        Stack<Integer> vStack = new Stack<>();
+        Stack<Integer> wStack = new Stack<>();
+        vStack.push(v);
+        wStack.push(w);
+        return processForTwoStacks(vStack, wStack);
+    }
+
+    private boolean processForTwoIterables(Iterable<Integer> v, Iterable<Integer> w) {
+        Stack<Integer> vStack = new Stack<>();
+        Stack<Integer> wStack = new Stack<>();
+
+        for (int item : v) {
+            vStack.push(item);
+        }
+        for (int item : w) {
+            wStack.push(item);
+        }
+        return processForTwoStacks(vStack, wStack);
+    }
+
+
+    private boolean processForTwoStacks(Stack<Integer> vTeam, Stack<Integer> wTeam) {
+        clearPreviousRun();
+        int step = 0;
+        while (!vTeam.isEmpty() || !wTeam.isEmpty()) {
+            // mark two teams
+            vTeam = updateTeamVertices(vTeam, teamVMark, step);
+            wTeam = updateTeamVertices(wTeam, teamWMark, step);
+            // After a round, if we found an ancestor and there is no hope to find a shorter one.
+            if (foundCommonAncestor && step >= length - 1) {
+                return true;
+            } else {
+                // do another round
+                vTeam = getNeighbours(vTeam);
+                wTeam = getNeighbours(wTeam);
+                step++;
+            }
+        }
+        // if we finished, use the best result
+        return foundCommonAncestor;
+    }
+
+    // Mark team members, and if they already marked, there may be an ancestor.
+    private Stack<Integer> updateTeamVertices(Stack<Integer> currentTeam, int teamMarkId, int step) {
+        Stack<Integer> updatedTeam = new Stack<>();
+        for (int member : currentTeam) {
+            //System.out.println("team "+ teamMarkId + " check " + member);
+            if (sapVertices[member].isMarked()) {
+                if (sapVertices[member].reachedby != teamMarkId) {
+                    updateResultOnFindNewAncestor(member,
+                            step + sapVertices[member].reachedDistance);
                 }
             } else {
-                sapVertices[neighbour].mark(teamWMark, 0);
+                sapVertices[member].mark(teamMarkId, step);
+                // and we try to explore its member
+                updatedTeam.push(member);
             }
         }
-        int stepV = 1;
-        int stepW = 1;
+        return updatedTeam;
+    }
 
-        while (!neighbourV.isEmpty() || !neighbourW.isEmpty()) {
-            // check neighbours
-            // do one round with v
-            for (int neighbour : neighbourV) {
-                if (sapVertices[neighbour].isMarked()) {
-                    if (sapVertices[neighbour].reachedby == teamVMark) {
-                        // ignore vertex marked by itself
-                    } else {
-                        // found ancestor, break;
-                        ancestor = neighbour;
-                        length = stepV + sapVertices[neighbour].reachedDistance;
-                        return true;
-                    }
-                } else {
-                    sapVertices[neighbour].mark(teamVMark, stepV);
-                }
+    // TODO this depend on Graph which make it not immutable.
+    private Stack<Integer> getNeighbours(Stack<Integer> currentTeam) {
+        Stack<Integer> nextTeam = new Stack<>();
+        for (int member : currentTeam) {
+            for (int memberNeighbour : mG.adj(member)) {
+                nextTeam.push(memberNeighbour);
             }
-            // do one round with w
-            for (int neighbour : neighbourW) {
-                if (sapVertices[neighbour].isMarked()) {
-                    if (sapVertices[neighbour].reachedby == teamWMark) {
-                        // ignore vertex marked by self
-                    } else {
-                        // found ancestor, break;
-                        ancestor = neighbour;
-                        length = stepW + sapVertices[neighbour].reachedDistance;
-                        return true;
-                    }
-                } else {
-                    sapVertices[neighbour].mark(teamWMark, stepW);
-                }
-            }
-            // if not found, need to update the neighbour and step
-            TreeSet<Integer> tempNeighbour = new TreeSet<>();
-            for (int neighbour : neighbourV) {
-                for (int neighboursNeighbour : mG.adj(neighbour)) {
-                    tempNeighbour.add(neighboursNeighbour);
-                }
-            }
-            neighbourV = tempNeighbour;
-            stepV++;
-            tempNeighbour = new TreeSet<>();
-            for (int neighbour : neighbourW) {
-                for (int neighboursNeighbour : mG.adj(neighbour)) {
-                    tempNeighbour.add(neighboursNeighbour);
-                }
-            }
-            neighbourW = tempNeighbour;
-            stepW++;
         }
-        return false;
+        return nextTeam;
+    }
+
+    private void updateResultOnFindNewAncestor(int newAncestor, int newLength) {
+        if (!foundCommonAncestor) {
+            this.ancestor = newAncestor;
+            this.length = newLength;
+            foundCommonAncestor = true;
+        } else {
+            if (newLength < length) {
+                this.ancestor = newAncestor;
+                this.length = newLength;
+            }
+        }
     }
 
     // do unit testing of this class
@@ -273,9 +189,29 @@ public class SAP {
         System.out.println("Ancestor of 11,3 is 1: " + ancestor_7_3);
     }
 
-    private void clearAdjListMarks() {
+    private void clearPreviousRun() {
+        // TODO this could be made more efficient
+        // if we use different mark at each run.
         for (SapVertice sapVertice : sapVertices) {
             sapVertice.clearMark();
+        }
+        foundCommonAncestor = false;
+        ancestor = -1;
+        length = -1;
+    }
+
+    private void argumentCheckerVerticeSet(Iterable<Integer> v) {
+        if (v == null) {
+            throw new IllegalArgumentException("Argument can not be null");
+        }
+        for (int item : v) {
+            argumentCheckerVertice(item);
+        }
+    }
+
+    private void argumentCheckerVertice(int v) {
+        if (v < 0 || v >= mG.V()) {
+            throw new IllegalArgumentException("detect illegal item value");
         }
     }
 
