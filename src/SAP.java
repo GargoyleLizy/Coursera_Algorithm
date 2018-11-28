@@ -28,7 +28,7 @@ public class SAP {
                 }
             }
         }
-        mG = G;
+        mG = new Digraph(G);
 
         sapVertices = new SapVertice[G.V()];
         for (int i = 0; i < G.V(); i++) {
@@ -201,7 +201,10 @@ public class SAP {
         if (v == null) {
             throw new IllegalArgumentException("Argument can not be null");
         }
-        for (int item : v) {
+        for (Integer item : v) {
+            if (item == null) {
+                throw new IllegalArgumentException("Argument can not be null");
+            }
             argumentCheckerVertice(item);
         }
     }
