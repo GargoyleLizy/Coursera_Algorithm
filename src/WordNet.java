@@ -3,6 +3,7 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.RedBlackBST;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class WordNet {
     private static String LINE_SEPERATOR = ",";
@@ -12,7 +13,7 @@ public class WordNet {
     // One to use the int as key
     private ArrayList<String> synsetArr = new ArrayList<>();
     // One to use the string as key
-    private RedBlackBST<String, Integer> synsetBST = new RedBlackBST<>();
+    private RedBlackBST<String, LinkedList<Integer>> synsetBST = new RedBlackBST<>();
 
     private Digraph hypernymGraph;
     private SAP synsetSap;
@@ -32,11 +33,14 @@ public class WordNet {
             // populate data structure
             synsetArr.add(synsetValue);
             for (String splitSynset : synsetSplit) {
-                synsetBST.put(splitSynset, id);
-//                if(splitSynset.equals("horse")){
-//                    System.out.println("found horse: " + splitSynset + " line: " + id);
-//                    System.out.println(synsetBST.get("horse"));
-//                }
+                LinkedList<Integer> previousIds = synsetBST.get(splitSynset);
+                if (previousIds == null) {
+                    LinkedList<Integer> currentResult = new LinkedList<>();
+                    currentResult.add(id);
+                    synsetBST.put(splitSynset, currentResult);
+                } else {
+                    previousIds.add(id);
+                }
             }
             count = id;
         }
@@ -82,9 +86,9 @@ public class WordNet {
         if (!isNoun(nounB)) {
             throw new IllegalArgumentException("distance arguments should be a noun: " + nounB);
         }
-        int nounAid = synsetBST.get(nounA);
-        int nounBid = synsetBST.get(nounB);
-        return synsetSap.length(nounAid, nounBid);
+        LinkedList<Integer> nounAidLinkedList = synsetBST.get(nounA);
+        LinkedList<Integer> nounBidLinkedList = synsetBST.get(nounB);
+        return synsetSap.length(nounAidLinkedList, nounBidLinkedList);
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
@@ -94,9 +98,9 @@ public class WordNet {
         if (!isNoun(nounA) || !isNoun(nounB)) {
             throw new IllegalArgumentException("distance arguments should be inside the method.");
         }
-        int nounAid = synsetBST.get(nounA);
-        int nounBid = synsetBST.get(nounB);
-        int ancestorId = synsetSap.ancestor(nounAid, nounBid);
+        LinkedList<Integer> nounAidLinkedList = synsetBST.get(nounA);
+        LinkedList<Integer> nounBidLinkedList = synsetBST.get(nounB);
+        int ancestorId = synsetSap.ancestor(nounAidLinkedList, nounBidLinkedList);
         if (ancestorId == -1) {
             return null;
         } else {
