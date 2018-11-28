@@ -1,7 +1,5 @@
 import edu.princeton.cs.algs4.Digraph;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 public class SAP {
