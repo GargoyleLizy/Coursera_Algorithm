@@ -1,5 +1,8 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 
@@ -134,6 +137,7 @@ public class SAP {
                 if (sapVertices[member].reachedby != teamMarkId) {
                     updateResultOnFindNewAncestor(member,
                             step + sapVertices[member].reachedDistance);
+                    updatedTeam.push(member);
                 }
             } else {
                 sapVertices[member].mark(teamMarkId, step);
@@ -170,23 +174,16 @@ public class SAP {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        Digraph testGraph = new Digraph(13);
-        testGraph.addEdge(7, 3);
-        testGraph.addEdge(8, 3);
-        testGraph.addEdge(3, 1);
-        testGraph.addEdge(4, 1);
-        testGraph.addEdge(5, 1);
-        testGraph.addEdge(9, 5);
-        testGraph.addEdge(10, 5);
-        testGraph.addEdge(11, 10);
-        testGraph.addEdge(12, 10);
-        testGraph.addEdge(1, 0);
-        testGraph.addEdge(2, 0);
-        SAP testSap = new SAP(testGraph);
-        int length_11_3 = testSap.length(11, 3);
-        System.out.println("length of 11,3 is 4: " + length_11_3);
-        int ancestor_7_3 = testSap.ancestor(11, 3);
-        System.out.println("Ancestor of 11,3 is 1: " + ancestor_7_3);
+        In in = new In(args[0]);
+        Digraph G = new Digraph(in);
+        SAP sap = new SAP(G);
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length = sap.length(v, w);
+            int ancestor = sap.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
     }
 
     private void clearPreviousRun() {
