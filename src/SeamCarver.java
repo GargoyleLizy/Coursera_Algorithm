@@ -1,33 +1,35 @@
 import edu.princeton.cs.algs4.Picture;
 
 public class SeamCarver {
+    private Picture mPicture;
+    private double[][] energies;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
         if (picture == null) {
             throw new IllegalArgumentException("constructor does not take null argument");
         }
+        mPicture = picture;
     }
 
     // current picture
     public Picture picture() {
-        return null;
+        return mPicture;
     }
 
     // width of current picture
     public int width() {
-        return -1;
+        return mPicture.width();
     }
 
     // height of current picture
     public int height() {
-        return -1;
+        return mPicture.height();
     }
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-
-        return -1;
+        return computeEnergy(x, y);
     }
 
     // sequence of indices for horizontal seam
@@ -45,7 +47,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("removeHorizontalSeam does not take null argument");
         }
-        if(width()<=1){
+        if (width() <= 1) {
             throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
         }
         checkHorizontalSeam(seam);
@@ -57,7 +59,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("removeVerticalSeam does not take null argument");
         }
-        if(height()<=1){
+        if (height() <= 1) {
             throw new IllegalArgumentException("removeVerticalSeam fail when height <=1 ");
         }
         checkVerticalSeam(seam);
@@ -105,5 +107,41 @@ public class SeamCarver {
             }
             prevY = seam[i];
         }
+    }
+
+    // Computing the energy of a pixel.
+    private double computeEnergy(int x, int y) {
+        if (isPixelBorder(x, y)) {
+            return 1000;
+        }
+        // calculate radiant x.
+        int leftX = mPicture.getRGB(x - 1, y);
+        int rightX = mPicture.getRGB(x + 1, y);
+
+        int upY = mPicture.getRGB(x, y - 1);
+        int downY = mPicture.getRGB(x, y + 1);
+
+        double radiantValue = computeRadiant(leftX, rightX) + computeRadiant(upY, downY);
+        return Math.sqrt(radiantValue);
+    }
+
+    private boolean isPixelBorder(int x, int y) {
+        return x == 0 || y == 0 || x == width() - 1 || y == height() - 1;
+    }
+
+    private int computeRadiant(int oneRGB, int anotherRGB) {
+        int r1 = (oneRGB >> 16) & 0xFF;
+        int g1 = (oneRGB >> 8) & 0xFF;
+        int b1 = (oneRGB >> 0) & 0xFF;
+
+        int r2 = (anotherRGB >> 16) & 0xFF;
+        int g2 = (anotherRGB >> 8) & 0xFF;
+        int b2 = (anotherRGB >> 0) & 0xFF;
+
+        int rDiff = r1 - r2;
+        int gDiff = g1 - g2;
+        int bDiff = b1 - b2;
+
+        return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
     }
 }
