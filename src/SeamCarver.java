@@ -288,33 +288,20 @@ public class SeamCarver {
 
     // Assume there is always a line below (i,j)
     private int findMinEdgeToValue(int i, int j) {
-        if (i == 0) {
-            if (verticalDistTo[i][j + 1] < verticalEdgeTo[i + 1][j + 1]) {
-                return i;
-            } else {
-                return i + 1;
-            }
-        }
-        if (i == mPicture.width() - 1) {
+        int minIndexP = i;
+        if (i - 1 >= 0) {
             if (verticalDistTo[i][j + 1] < verticalDistTo[i - 1][j + 1]) {
-                return i;
+                minIndexP = i;
             } else {
-                return i - 1;
+                minIndexP = i - 1;
             }
         }
-        // Beside corner case,
-
-        double left = verticalDistTo[i - 1][j + 1];
-        double center = verticalDistTo[i][j + 1];
-        double right = verticalDistTo[i + 1][j + 1];
-        int minIndex = i - 1;
-        if (center < left) {
-            minIndex = i;
+        if (i + 1 < mPicture.width()) {
+            if(verticalDistTo[i+1][j+1] < verticalDistTo[minIndexP][j+1]){
+                minIndexP = i+1;
+            }
         }
-        if (right < verticalDistTo[minIndex][j + 1]) {
-            minIndex = i + 1;
-        }
-        return minIndex;
+        return minIndexP;
     }
 
     private void transposePicture() {
