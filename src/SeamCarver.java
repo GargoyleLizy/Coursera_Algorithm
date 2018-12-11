@@ -46,14 +46,9 @@ public class SeamCarver {
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-        //System.out.print("energy: " + x + " " + y + "; ");
         if (isTransposed) {
-            //System.out.println("w: " + width() + "; h: " + height());
-            //System.out.println(computeEnergy(y,x));
             return computeEnergy(y, x);
         } else {
-            //System.out.println("w: " + width() + "; h: " + height());
-            //System.out.println(computeEnergy(x,y));
             return computeEnergy(x, y);
         }
     }
@@ -70,6 +65,9 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
+        if(!isTransposed){
+            transposePicture();
+        }
         energyMatrix = computeEnergyMatrix();
         int startSeamIndex = findVerticalSeamStart();
         int[] seamArr = new int[mPicture.height()];
@@ -119,6 +117,7 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeVerticalSeam fail when height <=1 ");
         }
         checkVerticalSeam(seam);
+        
     }
 
     private void checkerPixelX(int x) {
