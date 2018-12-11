@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.Picture;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SeamCarver {
     private Picture mPicture;
@@ -6,8 +7,8 @@ public class SeamCarver {
 
     // temp matrix required for computing the seam.
     double[][] energyMatrix;
-    double[][] verticalSeamMatrix;
-    int[][] verticalEdgeToMatrix;
+    double[][] verticalDistTo;
+    int[][] verticalEdgeTo;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
@@ -75,8 +76,26 @@ public class SeamCarver {
         seamArr[0] = startSeamIndex;
         for (int j = 1; j < mPicture.height(); j++) {
             int prevEdgeTo = seamArr[j - 1];
-            seamArr[j] = verticalEdgeToMatrix[prevEdgeTo][j];
+            seamArr[j] = verticalEdgeTo[prevEdgeTo][j];
         }
+        //***
+        System.out.println("the seam matrix: ");
+        for(int j=0;j<mPicture.height();j++){
+            for(int i=0;i<mPicture.width();i++){
+                StdOut.printf("%7.2f ", verticalDistTo[i][j]);
+            }
+            System.out.println();
+        }
+        for(int j=0;j<mPicture.height();j++){
+            for(int i=0;i<mPicture.width();i++){
+                StdOut.printf(verticalEdgeTo[i][j] + " ");
+            }
+            System.out.println();
+        }
+        //***
+        // clean extra data
+        verticalEdgeTo = null;
+        verticalDistTo = null;
         return seamArr;
     }
 
@@ -196,7 +215,6 @@ public class SeamCarver {
                 } else {
                     energyArray[i][j] = energy(i, j);
                 }
-
             }
         }
         return energyArray;
@@ -204,23 +222,23 @@ public class SeamCarver {
 
     // compute the seam from bottom.
     private int findVerticalSeamStart() {
-        verticalSeamMatrix = new double[mPicture.width()][mPicture.height()];
-        verticalEdgeToMatrix = new int[mPicture.width()][mPicture.height()];
+        verticalDistTo = new double[mPicture.width()][mPicture.height()];
+        verticalEdgeTo = new int[mPicture.width()][mPicture.height()];
 
         // except the first line, we accumulate the matrix values.
         for (int j = mPicture.height() - 1; j > 0; j--) {
             // for bottom line, seam value is the energy, and no edge to.
             if (j == mPicture.height() - 1) {
                 for (int i = 0; i < mPicture.width(); i++) {
-                    verticalEdgeToMatrix[i][j] = -1;
-                    verticalSeamMatrix[i][j] = energyMatrix[i][j];
+                    verticalEdgeTo[i][j] = -1;
+                    verticalDistTo[i][j] = energyMatrix[i][j];
                 }
             }
             // for second bottom line, seam value is itself plus 1000, and edge to same index
             else if (j == mPicture.height() - 2) {
                 for (int i = 0; i < mPicture.width(); i++) {
-                    verticalEdgeToMatrix[i][j] = i;
-                    verticalSeamMatrix[i][j] = energyMatrix[i][j] + 1000;
+                    verticalEdgeTo[i][j] = i;
+                    verticalDistTo[i][j] = energyMatrix[i][j] + 1000;
                 }
             }
             // for the rest, check pick the smallest coming branch
@@ -228,8 +246,10 @@ public class SeamCarver {
                 for (int i = 0; i < mPicture.width(); i++) {
                     int minIndex = findMinEdgeToValue(i, j);
                     // then assign value to two matrix
-                    verticalEdgeToMatrix[i][j] = minIndex;
-                    verticalSeamMatrix[i][j] = verticalSeamMatrix[minIndex][j + 1] + energyMatrix[i][j];
+                    verticalEdgeTo[i][j] = minIndex;
+                    System.out.println("seam i : " + i +"; j: " + j);
+                    System.out.println("minIndex: " + minIndex+"; value: "+ verticalDistTo[minIndex][j + 1]);
+                    verticalDistTo[i][j] = verticalDistTo[minIndex][j + 1] + energyMatrix[i][j];
                 }
             }
         }
@@ -239,13 +259,14 @@ public class SeamCarver {
         double minSeamValue = Double.MAX_VALUE;
         for (int i = 0; i < mPicture.width(); i++) {
             int nextMinIndex = findMinEdgeToValue(i, 0);
-            verticalEdgeToMatrix[i][0] = nextMinIndex;
-            verticalSeamMatrix[i][0] = verticalSeamMatrix[i][1] + energyMatrix[i][0];
-            if (verticalSeamMatrix[i][0] < minSeamValue) {
+            verticalEdgeTo[i][0] = nextMinIndex;
+            verticalDistTo[i][0] = verticalDistTo[i][1] + energyMatrix[i][0];
+            if (verticalDistTo[i][0] < minSeamValue) {
                 minSeamIndex = i;
-                minSeamValue = verticalSeamMatrix[i][0];
+                minSeamValue = verticalDistTo[i][0];
             }
         }
+
 
         return minSeamIndex;
     }
@@ -253,14 +274,14 @@ public class SeamCarver {
     // Assume there is always a line below (i,j)
     private int findMinEdgeToValue(int i, int j) {
         if (i == 0) {
-            if (verticalSeamMatrix[i][j + 1] < verticalEdgeToMatrix[i + 1][j + 1]) {
+            if (verticalDistTo[i][j + 1] < verticalEdgeTo[i + 1][j + 1]) {
                 return i;
             } else {
                 return i + 1;
             }
         }
         if (i == mPicture.width() - 1) {
-            if (verticalSeamMatrix[i][j + 1] < verticalSeamMatrix[i - 1][j + 1]) {
+            if (verticalDistTo[i][j + 1] < verticalDistTo[i - 1][j + 1]) {
                 return i;
             } else {
                 return i - 1;
@@ -268,14 +289,14 @@ public class SeamCarver {
         }
         // Beside corner case,
 
-        double left = verticalSeamMatrix[i - 1][j + 1];
-        double center = verticalSeamMatrix[i][j + 1];
-        double right = verticalSeamMatrix[i + 1][j + 1];
+        double left = verticalDistTo[i - 1][j + 1];
+        double center = verticalDistTo[i][j + 1];
+        double right = verticalDistTo[i + 1][j + 1];
         int minIndex = i - 1;
         if (center < left) {
             minIndex = i;
         }
-        if (right < energyMatrix[minIndex][j + 1]) {
+        if (right < verticalDistTo[minIndex][j + 1]) {
             minIndex = i + 1;
         }
         return minIndex;
