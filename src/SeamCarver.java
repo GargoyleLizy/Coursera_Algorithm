@@ -1,14 +1,13 @@
 import edu.princeton.cs.algs4.Picture;
-import edu.princeton.cs.algs4.StdOut;
 
 public class SeamCarver {
     private Picture mPicture;
     private boolean isTransposed = false;
 
     // temp matrix required for computing the seam.
-    double[][] energyMatrix;
-    double[][] verticalDistTo;
-    int[][] verticalEdgeTo;
+    private double[][] energyMatrix;
+    private double[][] verticalDistTo;
+    private int[][] verticalEdgeTo;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
