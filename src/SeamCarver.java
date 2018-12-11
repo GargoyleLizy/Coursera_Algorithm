@@ -2,44 +2,82 @@ import edu.princeton.cs.algs4.Picture;
 
 public class SeamCarver {
     private Picture mPicture;
-    private double[][] energies;
+    private boolean isTransposed = false;
+
+    // temp matrix required for computing the seam.
+    double[][] energyMatrix;
+    double[][] verticalSeamMatrix;
+    int[][] verticalEdgeToMatrix;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
         if (picture == null) {
             throw new IllegalArgumentException("constructor does not take null argument");
         }
-        mPicture = picture;
+        mPicture = new Picture(picture);
     }
 
     // current picture
     public Picture picture() {
+        if (isTransposed) {
+            transposePicture();
+        }
         return mPicture;
     }
 
     // width of current picture
     public int width() {
-        return mPicture.width();
+        if (isTransposed) {
+            return mPicture.height();
+        } else {
+            return mPicture.width();
+        }
     }
 
     // height of current picture
     public int height() {
-        return mPicture.height();
+        if (isTransposed) {
+            return mPicture.width();
+        } else {
+            return mPicture.height();
+        }
     }
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-        return computeEnergy(x, y);
+        //System.out.print("energy: " + x + " " + y + "; ");
+        if (isTransposed) {
+            //System.out.println("w: " + width() + "; h: " + height());
+            //System.out.println(computeEnergy(y,x));
+            return computeEnergy(y, x);
+        } else {
+            //System.out.println("w: " + width() + "; h: " + height());
+            //System.out.println(computeEnergy(x,y));
+            return computeEnergy(x, y);
+        }
     }
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-        return null;
+        if (isTransposed) {
+            return findVerticalSeam();
+        } else {
+            transposePicture();
+            return findVerticalSeam();
+        }
     }
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        return null;
+        energyMatrix = computeEnergyMatrix();
+        int startSeamIndex = findVerticalSeamStart();
+        int[] seamArr = new int[mPicture.height()];
+        seamArr[0] = startSeamIndex;
+        for (int j = 1; j < mPicture.height(); j++) {
+            int prevEdgeTo = seamArr[j - 1];
+            seamArr[j] = verticalEdgeToMatrix[prevEdgeTo][j];
+        }
+        return seamArr;
     }
 
     // remove horizontal seam from current picture
@@ -51,7 +89,6 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
         }
         checkHorizontalSeam(seam);
-
     }
 
     // remove vertical seam from current picture
@@ -111,6 +148,7 @@ public class SeamCarver {
 
     // Computing the energy of a pixel.
     private double computeEnergy(int x, int y) {
+        //System.out.println("compute x: " + x + " ; y: " + y);
         if (isPixelBorder(x, y)) {
             return 1000;
         }
@@ -126,7 +164,7 @@ public class SeamCarver {
     }
 
     private boolean isPixelBorder(int x, int y) {
-        return x == 0 || y == 0 || x == width() - 1 || y == height() - 1;
+        return x == 0 || y == 0 || x == mPicture.width() - 1 || y == mPicture.height() - 1;
     }
 
     private int computeRadiant(int oneRGB, int anotherRGB) {
@@ -143,5 +181,115 @@ public class SeamCarver {
         int bDiff = b1 - b2;
 
         return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
+    }
+
+    // we compute the energy 2d array.
+    // Then we compute the seam array and a tracking edgeTo array.
+
+    // compute the energy
+    private double[][] computeEnergyMatrix() {
+        double[][] energyArray = new double[mPicture.width()][mPicture.height()];
+        for (int i = 0; i < mPicture.width(); i++) {
+            for (int j = 0; j < mPicture.height(); j++) {
+                if (isTransposed) {
+                    energyArray[i][j] = energy(j, i);
+                } else {
+                    energyArray[i][j] = energy(i, j);
+                }
+
+            }
+        }
+        return energyArray;
+    }
+
+    // compute the seam from bottom.
+    private int findVerticalSeamStart() {
+        verticalSeamMatrix = new double[mPicture.width()][mPicture.height()];
+        verticalEdgeToMatrix = new int[mPicture.width()][mPicture.height()];
+
+        // except the first line, we accumulate the matrix values.
+        for (int j = mPicture.height() - 1; j > 0; j--) {
+            // for bottom line, seam value is the energy, and no edge to.
+            if (j == mPicture.height() - 1) {
+                for (int i = 0; i < mPicture.width(); i++) {
+                    verticalEdgeToMatrix[i][j] = -1;
+                    verticalSeamMatrix[i][j] = energyMatrix[i][j];
+                }
+            }
+            // for second bottom line, seam value is itself plus 1000, and edge to same index
+            else if (j == mPicture.height() - 2) {
+                for (int i = 0; i < mPicture.width(); i++) {
+                    verticalEdgeToMatrix[i][j] = i;
+                    verticalSeamMatrix[i][j] = energyMatrix[i][j] + 1000;
+                }
+            }
+            // for the rest, check pick the smallest coming branch
+            else {
+                for (int i = 0; i < mPicture.width(); i++) {
+                    int minIndex = findMinEdgeToValue(i, j);
+                    // then assign value to two matrix
+                    verticalEdgeToMatrix[i][j] = minIndex;
+                    verticalSeamMatrix[i][j] = verticalSeamMatrix[minIndex][j + 1] + energyMatrix[i][j];
+                }
+            }
+        }
+
+        // for the first line, we assign the values and remember the min value.
+        int minSeamIndex = -1;
+        double minSeamValue = Double.MAX_VALUE;
+        for (int i = 0; i < mPicture.width(); i++) {
+            int nextMinIndex = findMinEdgeToValue(i, 0);
+            verticalEdgeToMatrix[i][0] = nextMinIndex;
+            verticalSeamMatrix[i][0] = verticalSeamMatrix[i][1] + energyMatrix[i][0];
+            if (verticalSeamMatrix[i][0] < minSeamValue) {
+                minSeamIndex = i;
+                minSeamValue = verticalSeamMatrix[i][0];
+            }
+        }
+
+        return minSeamIndex;
+    }
+
+    // Assume there is always a line below (i,j)
+    private int findMinEdgeToValue(int i, int j) {
+        if (i == 0) {
+            if (verticalSeamMatrix[i][j + 1] < verticalEdgeToMatrix[i + 1][j + 1]) {
+                return i;
+            } else {
+                return i + 1;
+            }
+        }
+        if (i == mPicture.width() - 1) {
+            if (verticalSeamMatrix[i][j + 1] < verticalSeamMatrix[i - 1][j + 1]) {
+                return i;
+            } else {
+                return i - 1;
+            }
+        }
+        // Beside corner case,
+
+        double left = verticalSeamMatrix[i - 1][j + 1];
+        double center = verticalSeamMatrix[i][j + 1];
+        double right = verticalSeamMatrix[i + 1][j + 1];
+        int minIndex = i - 1;
+        if (center < left) {
+            minIndex = i;
+        }
+        if (right < energyMatrix[minIndex][j + 1]) {
+            minIndex = i + 1;
+        }
+        return minIndex;
+    }
+
+    private void transposePicture() {
+        Picture transposed = new Picture(mPicture.height(), mPicture.width());
+        for (int i = 0; i < mPicture.width(); i++) {
+            for (int j = 0; j < mPicture.height(); j++) {
+                int rgb = mPicture.getRGB(i, j);
+                transposed.setRGB(j, i, rgb);
+            }
+        }
+        mPicture = transposed;
+        isTransposed = !isTransposed;
     }
 }
