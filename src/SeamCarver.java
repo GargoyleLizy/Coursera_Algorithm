@@ -74,24 +74,24 @@ public class SeamCarver {
         int startSeamIndex = findVerticalSeamStart();
         int[] seamArr = new int[mPicture.height()];
         seamArr[0] = startSeamIndex;
-        for (int j = 1; j < mPicture.height(); j++) {
-            int prevEdgeTo = seamArr[j - 1];
-            seamArr[j] = verticalEdgeTo[prevEdgeTo][j];
+        for (int j = 0; j < mPicture.height()-1; j++) {
+            int prevEdgeTo = seamArr[j];
+            seamArr[j+1] = verticalEdgeTo[prevEdgeTo][j];
         }
         //***
-        System.out.println("the seam matrix: ");
-        for(int j=0;j<mPicture.height();j++){
-            for(int i=0;i<mPicture.width();i++){
-                StdOut.printf("%7.2f ", verticalDistTo[i][j]);
-            }
-            System.out.println();
-        }
-        for(int j=0;j<mPicture.height();j++){
-            for(int i=0;i<mPicture.width();i++){
-                StdOut.printf(verticalEdgeTo[i][j] + " ");
-            }
-            System.out.println();
-        }
+//        System.out.println("the seam matrix: ");
+//        for(int j=0;j<mPicture.height();j++){
+//            for(int i=0;i<mPicture.width();i++){
+//                StdOut.printf("%7.2f ", verticalDistTo[i][j]);
+//            }
+//            System.out.println();
+//        }
+//        for(int j=0;j<mPicture.height();j++){
+//            for(int i=0;i<mPicture.width();i++){
+//                StdOut.printf(verticalEdgeTo[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
         //***
         // clean extra data
         verticalEdgeTo = null;
@@ -247,8 +247,6 @@ public class SeamCarver {
                     int minIndex = findMinEdgeToValue(i, j);
                     // then assign value to two matrix
                     verticalEdgeTo[i][j] = minIndex;
-                    System.out.println("seam i : " + i +"; j: " + j);
-                    System.out.println("minIndex: " + minIndex+"; value: "+ verticalDistTo[minIndex][j + 1]);
                     verticalDistTo[i][j] = verticalDistTo[minIndex][j + 1] + energyMatrix[i][j];
                 }
             }
@@ -260,14 +258,12 @@ public class SeamCarver {
         for (int i = 0; i < mPicture.width(); i++) {
             int nextMinIndex = findMinEdgeToValue(i, 0);
             verticalEdgeTo[i][0] = nextMinIndex;
-            verticalDistTo[i][0] = verticalDistTo[i][1] + energyMatrix[i][0];
+            verticalDistTo[i][0] = verticalDistTo[nextMinIndex][1] + energyMatrix[i][0];
             if (verticalDistTo[i][0] < minSeamValue) {
                 minSeamIndex = i;
                 minSeamValue = verticalDistTo[i][0];
             }
         }
-
-
         return minSeamIndex;
     }
 
