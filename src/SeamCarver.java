@@ -78,7 +78,7 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeHorizontalSeam does not take null argument");
         }
         if (height() <= 1) {
-            throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
+            throw new IllegalArgumentException("removeHorizontalSeam fail when height <=1");
         }
         checkHorizontalSeam(seam);
         if (!isTransposed) {
@@ -104,7 +104,7 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeVerticalSeam does not take null argument");
         }
         if (width() <= 1) {
-            throw new IllegalArgumentException("removeVerticalSeam fail when height <=1 ");
+            throw new IllegalArgumentException("removeVerticalSeam fail when width <=1 ");
         }
         checkVerticalSeam(seam);
         // Temp
@@ -137,9 +137,6 @@ public class SeamCarver {
     }
 
     private void checkVerticalSeam(int[] seam) {
-        if (seam.length <= 1) {
-            throw new IllegalArgumentException("removeVerticalSeam fail when width <=1");
-        }
         if(seam.length != height()){
             throw new IllegalArgumentException("Horizontal Seam length should be " + height() + "; while " + seam.length);
         }
@@ -156,9 +153,6 @@ public class SeamCarver {
     }
 
     private void checkHorizontalSeam(int[] seam) {
-        if (seam.length <= 1) {
-            throw new IllegalArgumentException("removeHorizontalSeam fail when height <=1");
-        }
         if(seam.length != width()){
             throw new IllegalArgumentException("Horizontal Seam length should be " + width() + "; while " + seam.length);
         }
