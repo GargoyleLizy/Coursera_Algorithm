@@ -45,6 +45,8 @@ public class SeamCarver {
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
+        checkerPixelX(x);
+        checkerPixelY(y);
         if (isTransposed) {
             return computeEnergy(y, x);
         } else {
@@ -75,7 +77,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("removeHorizontalSeam does not take null argument");
         }
-        if (width() <= 1) {
+        if (height() <= 1) {
             throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
         }
         checkHorizontalSeam(seam);
@@ -101,7 +103,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("removeVerticalSeam does not take null argument");
         }
-        if (height() <= 1) {
+        if (width() <= 1) {
             throw new IllegalArgumentException("removeVerticalSeam fail when height <=1 ");
         }
         checkVerticalSeam(seam);
@@ -138,6 +140,9 @@ public class SeamCarver {
         if (seam.length <= 1) {
             throw new IllegalArgumentException("removeVerticalSeam fail when width <=1");
         }
+        if(seam.length != height()){
+            throw new IllegalArgumentException("Horizontal Seam length should be " + height() + "; while " + seam.length);
+        }
         int prevX = seam[0];
         checkerPixelX(prevX);
         for (int i = 1; i < seam.length; i++) {
@@ -153,6 +158,9 @@ public class SeamCarver {
     private void checkHorizontalSeam(int[] seam) {
         if (seam.length <= 1) {
             throw new IllegalArgumentException("removeHorizontalSeam fail when height <=1");
+        }
+        if(seam.length != width()){
+            throw new IllegalArgumentException("Horizontal Seam length should be " + width() + "; while " + seam.length);
         }
         int prevY = seam[0];
         checkerPixelY(prevY);
