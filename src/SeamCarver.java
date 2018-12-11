@@ -176,7 +176,6 @@ public class SeamCarver {
 
     // Computing the energy of a pixel.
     private double computeEnergy(int x, int y) {
-        //System.out.println("compute x: " + x + " ; y: " + y);
         if (isPixelBorder(x, y)) {
             return 1000;
         }
@@ -288,7 +287,7 @@ public class SeamCarver {
         if (mPicture.height() > 1) {
             // for the first line, we assign the values and remember the min value.
             int minSeamIndex = -1;
-            double minSeamValue = Double.MAX_VALUE;
+            double minSeamValue = Double.POSITIVE_INFINITY;
             for (int i = 0; i < mPicture.width(); i++) {
                 int nextMinIndex = findMinEdgeToValue(i, 0);
                 verticalEdgeTo[i][0] = nextMinIndex;
@@ -316,9 +315,6 @@ public class SeamCarver {
             }
         }
         if (i + 1 < mPicture.width()) {
-            System.out.println(mPicture.width());
-            double k = verticalDistTo[i + 1][j + 1];
-            k = verticalDistTo[minIndexP][j + 1];
             if (verticalDistTo[i + 1][j + 1] < verticalDistTo[minIndexP][j + 1]) {
                 minIndexP = i + 1;
             }
