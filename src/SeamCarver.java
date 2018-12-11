@@ -65,16 +65,16 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        if(isTransposed){
+        if (isTransposed) {
             transposePicture();
         }
         energyMatrix = computeEnergyMatrix();
         int startSeamIndex = findVerticalSeamStart();
         int[] seamArr = new int[mPicture.height()];
         seamArr[0] = startSeamIndex;
-        for (int j = 0; j < mPicture.height()-1; j++) {
+        for (int j = 0; j < mPicture.height() - 1; j++) {
             int prevEdgeTo = seamArr[j];
-            seamArr[j+1] = verticalEdgeTo[prevEdgeTo][j];
+            seamArr[j + 1] = verticalEdgeTo[prevEdgeTo][j];
         }
         //***
 //        System.out.println("the seam matrix: ");
@@ -106,6 +106,21 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
         }
         checkHorizontalSeam(seam);
+        if(!isTransposed){
+            transposePicture();
+        }
+        // mPicture is transposed,
+        Picture temp = new Picture(mPicture.width()-1, mPicture.height());
+        for (int j = 0; j < temp.height(); j++) {
+            for (int i = 0; i < temp.width(); i++) {
+                if (i < seam[j]) {
+                    temp.setRGB(i, j, mPicture.getRGB(i, j));
+                } else {
+                    temp.setRGB(i, j, mPicture.getRGB(i+1, j ));
+                }
+            }
+        }
+        mPicture = temp;
     }
 
     // remove vertical seam from current picture
@@ -118,11 +133,20 @@ public class SeamCarver {
         }
         checkVerticalSeam(seam);
         // Temp
-        if(isTransposed){
+        if (isTransposed) {
             transposePicture();
         }
-        Picture temp = new Picture(width()-1,height());
-
+        Picture temp = new Picture(width() - 1, height());
+        for (int j = 0; j < temp.height(); j++) {
+            for (int i = 0; i < temp.width(); i++) {
+                if (i < seam[j]) {
+                    temp.setRGB(i, j, mPicture.getRGB(i, j));
+                } else {
+                    temp.setRGB(i, j, mPicture.getRGB(i+1, j));
+                }
+            }
+        }
+        mPicture = temp;
     }
 
     private void checkerPixelX(int x) {
@@ -241,10 +265,10 @@ public class SeamCarver {
             // for second bottom line, seam value is itself plus 1000, and edge to left index if possible
             else if (j == mPicture.height() - 2) {
                 for (int i = 0; i < mPicture.width(); i++) {
-                    if(i==0){
+                    if (i == 0) {
                         verticalEdgeTo[i][j] = 0;
-                    }else{
-                        verticalEdgeTo[i][j] = i-1;
+                    } else {
+                        verticalEdgeTo[i][j] = i - 1;
                     }
                     verticalDistTo[i][j] = energyMatrix[i][j] + 1000;
                 }
