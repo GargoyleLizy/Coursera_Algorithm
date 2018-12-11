@@ -22,7 +22,7 @@ public class SeamCarver {
         if (isTransposed) {
             transposePicture();
         }
-        return mPicture;
+        return new Picture(mPicture);
     }
 
     // width of current picture
