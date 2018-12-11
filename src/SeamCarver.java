@@ -234,10 +234,14 @@ public class SeamCarver {
                     verticalDistTo[i][j] = energyMatrix[i][j];
                 }
             }
-            // for second bottom line, seam value is itself plus 1000, and edge to same index
+            // for second bottom line, seam value is itself plus 1000, and edge to left index if possible
             else if (j == mPicture.height() - 2) {
                 for (int i = 0; i < mPicture.width(); i++) {
-                    verticalEdgeTo[i][j] = i;
+                    if(i==0){
+                        verticalEdgeTo[i][j] = 0;
+                    }else{
+                        verticalEdgeTo[i][j] = i-1;
+                    }
                     verticalDistTo[i][j] = energyMatrix[i][j] + 1000;
                 }
             }
