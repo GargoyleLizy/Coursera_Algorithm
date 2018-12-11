@@ -124,6 +124,12 @@ public class SeamCarver {
         mPicture = temp;
     }
 
+    public static void main(String[] args) {
+        Picture test = new Picture(8, 1);
+        SeamCarver carver = new SeamCarver(test);
+        carver.findVerticalSeam();
+    }
+
     private void checkerPixelX(int x) {
         if (x < 0 || x >= width()) {
             throw new IllegalArgumentException("Pixel x is not in proper range: " + x);
@@ -137,7 +143,7 @@ public class SeamCarver {
     }
 
     private void checkVerticalSeam(int[] seam) {
-        if(seam.length != height()){
+        if (seam.length != height()) {
             throw new IllegalArgumentException("Horizontal Seam length should be " + height() + "; while " + seam.length);
         }
         int prevX = seam[0];
@@ -153,7 +159,7 @@ public class SeamCarver {
     }
 
     private void checkHorizontalSeam(int[] seam) {
-        if(seam.length != width()){
+        if (seam.length != width()) {
             throw new IllegalArgumentException("Horizontal Seam length should be " + width() + "; while " + seam.length);
         }
         int prevY = seam[0];
@@ -247,7 +253,11 @@ public class SeamCarver {
             // for bottom line, seam value is the energy, and no edge to.
             if (j == mPicture.height() - 1) {
                 for (int i = 0; i < mPicture.width(); i++) {
-                    verticalEdgeTo[i][j] = -1;
+                    if (i == 0) {
+                        verticalEdgeTo[i][j] = 0;
+                    } else {
+                        verticalEdgeTo[i][j] = i - 1;
+                    }
                     verticalDistTo[i][j] = energyMatrix[i][j];
                 }
             }
@@ -273,19 +283,26 @@ public class SeamCarver {
             }
         }
 
-        // for the first line, we assign the values and remember the min value.
-        int minSeamIndex = -1;
-        double minSeamValue = Double.MAX_VALUE;
-        for (int i = 0; i < mPicture.width(); i++) {
-            int nextMinIndex = findMinEdgeToValue(i, 0);
-            verticalEdgeTo[i][0] = nextMinIndex;
-            verticalDistTo[i][0] = verticalDistTo[nextMinIndex][1] + energyMatrix[i][0];
-            if (verticalDistTo[i][0] < minSeamValue) {
-                minSeamIndex = i;
-                minSeamValue = verticalDistTo[i][0];
+        // only do rest when height is bigger then 1.
+        // second bottom line possible being double processed.
+        if (mPicture.height() > 1) {
+            // for the first line, we assign the values and remember the min value.
+            int minSeamIndex = -1;
+            double minSeamValue = Double.MAX_VALUE;
+            for (int i = 0; i < mPicture.width(); i++) {
+                int nextMinIndex = findMinEdgeToValue(i, 0);
+                verticalEdgeTo[i][0] = nextMinIndex;
+                verticalDistTo[i][0] = verticalDistTo[nextMinIndex][1] + energyMatrix[i][0];
+                if (verticalDistTo[i][0] < minSeamValue) {
+                    minSeamIndex = i;
+                    minSeamValue = verticalDistTo[i][0];
+                }
             }
+            return minSeamIndex;
+        } else {
+            return 0;
         }
-        return minSeamIndex;
+
     }
 
     // Assume there is always a line below (i,j)
@@ -299,8 +316,11 @@ public class SeamCarver {
             }
         }
         if (i + 1 < mPicture.width()) {
-            if(verticalDistTo[i+1][j+1] < verticalDistTo[minIndexP][j+1]){
-                minIndexP = i+1;
+            System.out.println(mPicture.width());
+            double k = verticalDistTo[i + 1][j + 1];
+            k = verticalDistTo[minIndexP][j + 1];
+            if (verticalDistTo[i + 1][j + 1] < verticalDistTo[minIndexP][j + 1]) {
+                minIndexP = i + 1;
             }
         }
         return minIndexP;
