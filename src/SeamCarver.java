@@ -65,7 +65,7 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
-        if(!isTransposed){
+        if(isTransposed){
             transposePicture();
         }
         energyMatrix = computeEnergyMatrix();
@@ -117,7 +117,12 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeVerticalSeam fail when height <=1 ");
         }
         checkVerticalSeam(seam);
-        
+        // Temp
+        if(isTransposed){
+            transposePicture();
+        }
+        Picture temp = new Picture(width()-1,height());
+
     }
 
     private void checkerPixelX(int x) {
