@@ -55,10 +55,10 @@ public class SeamCarver {
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
         if (isTransposed) {
-            return findVerticalSeam();
+            return findVerticalSeamImp();
         } else {
             transposePicture();
-            return findVerticalSeam();
+            return findVerticalSeamImp();
         }
     }
 
@@ -67,33 +67,7 @@ public class SeamCarver {
         if (isTransposed) {
             transposePicture();
         }
-        energyMatrix = computeEnergyMatrix();
-        int startSeamIndex = findVerticalSeamStart();
-        int[] seamArr = new int[mPicture.height()];
-        seamArr[0] = startSeamIndex;
-        for (int j = 0; j < mPicture.height() - 1; j++) {
-            int prevEdgeTo = seamArr[j];
-            seamArr[j + 1] = verticalEdgeTo[prevEdgeTo][j];
-        }
-        //***
-//        System.out.println("the seam matrix: ");
-//        for(int j=0;j<mPicture.height();j++){
-//            for(int i=0;i<mPicture.width();i++){
-//                StdOut.printf("%7.2f ", verticalDistTo[i][j]);
-//            }
-//            System.out.println();
-//        }
-//        for(int j=0;j<mPicture.height();j++){
-//            for(int i=0;i<mPicture.width();i++){
-//                StdOut.printf(verticalEdgeTo[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-        //***
-        // clean extra data
-        verticalEdgeTo = null;
-        verticalDistTo = null;
-        return seamArr;
+        return findVerticalSeamImp();
     }
 
     // remove horizontal seam from current picture
@@ -105,17 +79,17 @@ public class SeamCarver {
             throw new IllegalArgumentException("removeHorizontalSeam fail when width <=1");
         }
         checkHorizontalSeam(seam);
-        if(!isTransposed){
+        if (!isTransposed) {
             transposePicture();
         }
         // mPicture is transposed,
-        Picture temp = new Picture(mPicture.width()-1, mPicture.height());
+        Picture temp = new Picture(mPicture.width() - 1, mPicture.height());
         for (int j = 0; j < temp.height(); j++) {
             for (int i = 0; i < temp.width(); i++) {
                 if (i < seam[j]) {
                     temp.setRGB(i, j, mPicture.getRGB(i, j));
                 } else {
-                    temp.setRGB(i, j, mPicture.getRGB(i+1, j ));
+                    temp.setRGB(i, j, mPicture.getRGB(i + 1, j));
                 }
             }
         }
@@ -141,7 +115,7 @@ public class SeamCarver {
                 if (i < seam[j]) {
                     temp.setRGB(i, j, mPicture.getRGB(i, j));
                 } else {
-                    temp.setRGB(i, j, mPicture.getRGB(i+1, j));
+                    temp.setRGB(i, j, mPicture.getRGB(i + 1, j));
                 }
             }
         }
@@ -245,6 +219,20 @@ public class SeamCarver {
             }
         }
         return energyArray;
+    }
+
+    private int[] findVerticalSeamImp() {
+        energyMatrix = computeEnergyMatrix();
+        int startSeamIndex = findVerticalSeamStart();
+        int[] seamArr = new int[mPicture.height()];
+        seamArr[0] = startSeamIndex;
+        for (int j = 0; j < mPicture.height() - 1; j++) {
+            int prevEdgeTo = seamArr[j];
+            seamArr[j + 1] = verticalEdgeTo[prevEdgeTo][j];
+        }
+        verticalEdgeTo = null;
+        verticalDistTo = null;
+        return seamArr;
     }
 
     // compute the seam from bottom.
