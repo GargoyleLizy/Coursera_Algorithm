@@ -1,13 +1,15 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class BaseballElimination {
     private int numberOfTeams;
     private int[] win, lose, remain;
     private String[] teamNames;
     private int[][] remainingGames;
-
+    
+    private HashMap<String, Set<String>> eliminated = new HashMap<>();
 
     // create a baseball division from given filename in format specified below
     public BaseballElimination(String filename) {
@@ -25,10 +27,13 @@ public class BaseballElimination {
             win[i] = in.readInt();
             lose[i] = in.readInt();
             remain[i] = in.readInt();
-            for(int j=0;j<numberOfTeams;j++){
-                remainingGames[i][j]=in.readInt();
+            for (int j = 0; j < numberOfTeams; j++) {
+                remainingGames[i][j] = in.readInt();
             }
         }
+        // eliminated the trivial
+        checkTrivialElimiated();
+
     }
 
     // number of teams
@@ -40,6 +45,7 @@ public class BaseballElimination {
     public Iterable<String> teams() {
         return () -> new Iterator<String>() {
             private int next = 0;
+
             @Override
             public boolean hasNext() {
                 return next < teamNames.length;
@@ -87,20 +93,31 @@ public class BaseballElimination {
     // is given team eliminated?
     public boolean isEliminated(String team) {
         checkTeamArgumentNull(team, "isEliminated");
-        return false;
+        return eliminated.get(team) != null;
     }
 
     // subset R of teams that eliminates given team; null if not eliminated
     public Iterable<String> certificateOfElimination(String team) {
         checkTeamArgumentNull(team, "certificateOfElimination");
-        return null;
+        if (eliminated.get(team) != null) {
+            return () -> eliminated.get(team).iterator();
+        } else {
+            return null;
+        }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         BaseballElimination division = new BaseballElimination(args[0]);
-        System.out.println("number: " + division.numberOfTeams());
-        for(String name: division.teams()){
-            System.out.println("teamName: " + name);
+        for (String team : division.teams()) {
+            if (division.isEliminated(team)) {
+                StdOut.print(team + " is eliminated by the subset R = { ");
+                for (String t : division.certificateOfElimination(team)) {
+                    StdOut.print(t + " ");
+                }
+                StdOut.println("}");
+            } else {
+                StdOut.println(team + " is not eliminated");
+            }
         }
     }
 
@@ -111,12 +128,31 @@ public class BaseballElimination {
     }
 
     // this could be optimized
-    private int findTeamIndex(String teamName){
-        for(int i=0;i<numberOfTeams;i++){
-            if(teamNames[i].equals(teamName)){
+    private int findTeamIndex(String teamName) {
+        for (int i = 0; i < numberOfTeams; i++) {
+            if (teamNames[i].equals(teamName)) {
                 return i;
             }
         }
         throw new IllegalArgumentException("teamName " + teamName + " is not recorded");
+    }
+
+    // We eliminated the teams that has no chance to be first.
+    private void checkTrivialElimiated() {
+        int most = 0;
+        int mostIndex = 0;
+        for (int i = 0; i < numberOfTeams; i++) {
+            if (most < win[i]) {
+                most = win[i];
+                mostIndex = i;
+            }
+        }
+        for (int i = 0; i < numberOfTeams; i++) {
+            if (win[i] + remain[i] < most) {
+                Set<String> correspondingSet = new TreeSet<>();
+                correspondingSet.add(teamNames[mostIndex]);
+                eliminated.put(teamNames[i], correspondingSet);
+            }
+        }
     }
 }
