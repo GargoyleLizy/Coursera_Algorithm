@@ -1,4 +1,4 @@
-/******************************************************************************
+package part_two.week2; /******************************************************************************
  *  Compilation:  javac PrintEnergy.java
  *  Execution:    java PrintEnergy input.png
  *  Dependencies: SeamCarver.java

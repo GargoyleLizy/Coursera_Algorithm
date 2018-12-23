@@ -1,4 +1,4 @@
-/******************************************************************************
+package part_two.week2; /******************************************************************************
  *  Compilation:  javac PrintSeams.java
  *  Execution:    java PrintSeams input.png
  *  Dependencies: SeamCarver.java

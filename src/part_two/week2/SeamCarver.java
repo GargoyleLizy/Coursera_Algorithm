@@ -1,3 +1,5 @@
+package part_two.week2;
+
 import edu.princeton.cs.algs4.Picture;
 
 public class SeamCarver {
