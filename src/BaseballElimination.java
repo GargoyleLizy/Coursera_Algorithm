@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class BaseballElimination {
-    private int numberOfTeams;
-    private int[] win, lose, remain;
-    private String[] teamNames;
-    private int[][] remainingGames;
+    private final int numberOfTeams;
+    private final int[] win, lose, remain;
+    private final String[] teamNames;
+    private final int[][] remainingGames;
 
     private HashMap<String, Set<String>> eliminated = new HashMap<>();
 
@@ -188,10 +188,10 @@ public class BaseballElimination {
         Set<String> isOnSourceSide = new TreeSet<>();
         for (int i = 0; i < numberOfTeams - 1; i++) {
             for (int j = i + 1; j < numberOfTeams; j++) {
-                if(i!=teamIndex && j!=teamIndex){
-                    int gamesBetijVertexIndex = convertGameToVertexIndex(i,j,teamIndex);
+                if (i != teamIndex && j != teamIndex) {
+                    int gamesBetijVertexIndex = convertGameToVertexIndex(i, j, teamIndex);
                     // if the game vertex is on source side, then it is not full.
-                    if(fordFulkerson.inCut(gamesBetijVertexIndex)){
+                    if (fordFulkerson.inCut(gamesBetijVertexIndex)) {
                         isOnSourceSide.add(teamNames[i]);
                         isOnSourceSide.add(teamNames[j]);
                     }
