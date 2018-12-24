@@ -1,6 +1,13 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.FlowNetwork;
+import edu.princeton.cs.algs4.FordFulkerson;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.FlowEdge;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class BaseballElimination {
     private int numberOfTeams;
@@ -178,7 +185,7 @@ public class BaseballElimination {
         FordFulkerson fordFulkerson = new FordFulkerson(flowNetwork, 0, flowNetwork.V() - 1);
         // we check which vertex is not on source side,
         // if it is not eliminated, then all the game vertex should be on the source side.
-        Set<String> isOnSourceSide = new TreeSet<String>();
+        Set<String> isOnSourceSide = new TreeSet<>();
         for (int i = 0; i < numberOfTeams - 1; i++) {
             for (int j = i + 1; j < numberOfTeams; j++) {
                 if(i!=teamIndex && j!=teamIndex){
