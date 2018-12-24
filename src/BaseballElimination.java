@@ -27,7 +27,7 @@ public class BaseballElimination {
         remain = new int[numberOfTeams];
         teamNames = new String[numberOfTeams];
         remainingGames = new int[numberOfTeams][numberOfTeams];
-
+        
         for (int i = 0; i < numberOfTeams; i++) {
             teamNames[i] = in.readString();
             win[i] = in.readInt();
@@ -68,29 +68,29 @@ public class BaseballElimination {
 
     // number of wins for given team
     public int wins(String team) {
-        checkTeamArgumentNull(team, "wins");
+        validTeamNameArgument(team, "wins");
         int index = findTeamIndex(team);
         return win[index];
     }
 
     // number of losses for given team
     public int losses(String team) {
-        checkTeamArgumentNull(team, "losses");
+        validTeamNameArgument(team, "losses");
         int index = findTeamIndex(team);
         return lose[index];
     }
 
     // number of remaining games for given team
     public int remaining(String team) {
-        checkTeamArgumentNull(team, "remaining");
+        validTeamNameArgument(team, "remaining");
         int index = findTeamIndex(team);
         return remain[index];
     }
 
     // number of remaining games between team1 and team2
     public int against(String team1, String team2) {
-        checkTeamArgumentNull(team1, "against 1");
-        checkTeamArgumentNull(team2, "against 2");
+        validTeamNameArgument(team1, "against 1");
+        validTeamNameArgument(team2, "against 2");
         int index1 = findTeamIndex(team1);
         int index2 = findTeamIndex(team2);
         return remainingGames[index1][index2];
@@ -99,13 +99,13 @@ public class BaseballElimination {
     // is given team eliminated?
     // TODO this could be optimized if we use a boolean array.
     public boolean isEliminated(String team) {
-        checkTeamArgumentNull(team, "isEliminated");
+        validTeamNameArgument(team, "isEliminated");
         return eliminated.get(team) != null;
     }
 
     // subset R of teams that eliminates given team; null if not eliminated
     public Iterable<String> certificateOfElimination(String team) {
-        checkTeamArgumentNull(team, "certificateOfElimination");
+        validTeamNameArgument(team, "certificateOfElimination");
         if (eliminated.get(team) != null) {
             return () -> eliminated.get(team).iterator();
         } else {
@@ -128,10 +128,24 @@ public class BaseballElimination {
         }
     }
 
-    private void checkTeamArgumentNull(String team, String method) {
+    private void validTeamNameArgument(String team, String method){
+        validTeamArgumentNull(team,method);
+        validTeamNameArgumentLegal(team);
+    }
+
+    private void validTeamArgumentNull(String team, String method) {
         if (team == null) {
             throw new IllegalArgumentException("Argument team should not be null for method: " + method);
         }
+    }
+
+    private void validTeamNameArgumentLegal(String targetTeam){
+        for(String teamName:teamNames){
+            if(teamName.equals(targetTeam)){
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Team " + targetTeam + " does not exist");
     }
 
     // this could be optimized
@@ -200,7 +214,6 @@ public class BaseballElimination {
         }
         return isOnSourceSide;
     }
-
 
     private FlowNetwork constructFlowNetwork(int targetTeamIndex) {
         int gameVs = (numberOfTeams - 1) * (numberOfTeams - 2) / 2;
