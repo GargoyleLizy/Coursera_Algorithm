@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.TrieST;
+
 public class BoggleDictTries {
     // Just store the English alphabet.
     // no space or other symbols.
@@ -7,8 +9,8 @@ public class BoggleDictTries {
     private int n;// number of keys in trie
 
     private static class Node {
-        private boolean isAnEnd;
-        private boolean hasPostfix;
+        private boolean isAnEnd = false;
+        private boolean hasPostfix = false;
         private Node parent;
         private Node[] next = new Node[R];
     }
@@ -38,6 +40,33 @@ public class BoggleDictTries {
         return x;
     }
 
+    private Node get(String word) {
+        if (word == null) throw new IllegalArgumentException("Argument to get() is null");
+        return get(root, word, 0);
+    }
+
+    private Node get(Node x, String key, int d) {
+        if (x == null) return null;
+        if (d == key.length()) return x;
+        char c = key.charAt(d);
+        return get(x.next[c], key, d + 1);
+    }
+
+    public boolean contains(String word) {
+        if (word == null) throw new IllegalArgumentException("Argument to contains() is null");
+        return get(word) != null;
+    }
+
+    public boolean hasMatchedPrefix(String prefix) {
+        if (prefix == null) throw new IllegalArgumentException("Argument to hasPrefix() is null");
+        Node prefixNode = get(prefix);
+        if (prefixNode == null) {
+            return false;
+        } else {
+            return prefixNode.hasPostfix || prefixNode.isAnEnd;
+        }
+    }
+
     /**
      * Returns the number of words in the dictionary.
      *
@@ -54,26 +83,24 @@ public class BoggleDictTries {
     /**
      * Start a Boggle run with a start character.
      *
-     * @param starterC should be an upper case English alphabet character.
      */
-    public void startABoggleTry(char starterC) {
+    public void startABoggleTry() {
         currentNode = root;
-        currentNode = root.next[starterC - 'A'];
-
         currentWord = new StringBuilder();
-        currentWord.append(starterC);
     }
 
     // Try expand the existing string
-    public void appendCharacter(char appendC){
-        currentNode = currentNode.next[appendC -'A'];
+    public void appendCharacter(char appendC) {
+        currentNode = currentNode.next[appendC - 'A'];
+        currentParentNode = currentNode;
         currentWord.append(appendC);
     }
 
     // No more possible answers, step back to last state.
-    public void stepBack(){
+    public void stepBack() {
         currentNode = currentParentNode;
-        currentWord.replace(currentWord.length()-1,currentWord.length(),"");
+        currentParentNode = currentNode.parent;
+        currentWord.replace(currentWord.length() - 1, currentWord.length(), "");
     }
 
     public boolean isCurrentAWordMatch() {
