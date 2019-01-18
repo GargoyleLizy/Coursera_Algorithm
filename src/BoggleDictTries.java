@@ -38,6 +38,18 @@ public class BoggleDictTries {
         return x;
     }
 
+    /**
+     * Does this symbol table contain the given key?
+     * @param key the key
+     * @return {@code true} if this symbol table contains {@code key} and
+     *     {@code false} otherwise
+     * @throws IllegalArgumentException if {@code key} is {@code null}
+     */
+    public boolean contains(String key) {
+        if (key == null) throw new IllegalArgumentException("argument to contains() is null");
+        return get(key) != null;
+    }
+
     private Node get(String word) {
         if (word == null) throw new IllegalArgumentException("Argument to get() is null");
         return get(root, word, 0);
