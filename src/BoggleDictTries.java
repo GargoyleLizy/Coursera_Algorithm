@@ -52,72 +52,46 @@ public class BoggleDictTries {
         return get(x.next[c], key, d + 1);
     }
 
-    public boolean contains(String word) {
-        if (word == null) throw new IllegalArgumentException("Argument to contains() is null");
-        return get(word) != null;
-    }
-
-    public boolean hasMatchedPrefix(String prefix) {
-        if (prefix == null) throw new IllegalArgumentException("Argument to hasPrefix() is null");
-        Node prefixNode = get(prefix);
-        if (prefixNode == null) {
-            return false;
-        } else {
-            return prefixNode.hasPostfix || prefixNode.isAnEnd;
-        }
-    }
-
-    /**
-     * Returns the number of words in the dictionary.
-     *
-     * @return the number of words in the dictionary.
-     */
-    public int size() {
-        return n;
-    }
-
     private Node currentParentNode;
     private Node currentNode;
     private StringBuilder currentWord;
 
     /**
      * Start a Boggle run with a start character.
-     *
      */
-    public void startABoggleTry() {
+    void startABoggleTry() {
         currentNode = root;
         currentWord = new StringBuilder();
     }
 
     // Try expand the existing string
-    public void appendCharacter(char appendC) {
-        //System.out.println("append Character: "  +appendC  +" node: " + currentNode);
+    void appendCharacter(char appendC) {
         currentParentNode = currentNode;
         currentNode = currentNode.next[appendC - 'A'];
         currentWord.append(appendC);
     }
 
     // No more possible answers, step back to last state.
-    public void stepBack() {
+    void stepBack() {
         currentNode = currentParentNode;
-        if(currentNode!=null){
+        if (currentNode != null) {
             currentParentNode = currentNode.parent;
         }
         currentWord.replace(currentWord.length() - 1, currentWord.length(), "");
     }
 
-    public boolean isCurrentAWordMatch() {
+    boolean isCurrentAWordMatch() {
         if (currentNode == null) {
             return false;
         }
         return currentNode.isAnEnd;
     }
 
-    public String getMatchedWord() {
+    String getMatchedWord() {
         return currentWord.toString();
     }
 
-    public boolean stillHasPostfix() {
+    boolean stillHasPostfix() {
         if (currentNode == null) {
             return false;
         }
@@ -130,6 +104,4 @@ public class BoggleDictTries {
     private boolean isValidEnglishWord(String word) {
         return true;
     }
-
-
 }

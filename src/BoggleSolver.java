@@ -9,6 +9,10 @@ public class BoggleSolver {
 
     private BoggleDictTries dictTries = new BoggleDictTries();
 
+    // Temp variables to hold for each boggle game.
+    private LinkedList<IntPair> existingPosList = new LinkedList<>();
+    private TreeSet<String> validWords = new TreeSet<>();
+
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
@@ -25,7 +29,6 @@ public class BoggleSolver {
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
-        word = word.replace("QU", "Q");
         switch (word.length()) {
             case 0:
             case 1:
@@ -56,9 +59,6 @@ public class BoggleSolver {
         return validWords;
     }
 
-    private LinkedList<IntPair> existingPosList = new LinkedList<>();
-    private TreeSet<String> validWords = new TreeSet<>();
-
     // Do a Depth-First-Search from a position of Boggle Board,
     // Each time, check if there are still words in dictionary matched the prefix.
     private void iterateBoardFromPosition(BoggleBoard board, int startRow, int startCol) {
@@ -67,9 +67,20 @@ public class BoggleSolver {
     }
 
     private void checkNode(int row, int col, BoggleBoard board, BoggleDictTries dictTries) {
-        //TODO do QU here.
-        //System.out.println("Check node: " + row + "; " + col);
-        dictTries.appendCharacter(board.getLetter(row, col));
+        char nodeChar = board.getLetter(row,col);
+        // When it is Q, it actually is QU
+        if(nodeChar == 'Q'){
+            dictTries.appendCharacter('Q');
+            if(dictTries.stillHasPostfix()){
+                dictTries.appendCharacter('U');
+            }else{
+                // If after Q there is no postfix already, then quit this path
+                dictTries.stepBack();
+                return;
+            }
+        }else{
+            dictTries.appendCharacter(nodeChar);
+        }
         existingPosList.add(new IntPair(row, col));
         if (dictTries.isCurrentAWordMatch()) {
             String matchedWord = dictTries.getMatchedWord();
@@ -88,6 +99,10 @@ public class BoggleSolver {
             }
         }
         // After end search on this pos, step back and remove the pos list.
+        if(nodeChar=='Q'){
+            // if the node is Q, there is a need to step twice. for Q and U.
+            dictTries.stepBack();
+        }
         dictTries.stepBack();
         existingPosList.removeLast();
     }
