@@ -91,7 +91,7 @@ public class BoggleDictTries {
 
     // Try expand the existing string
     public void appendCharacter(char appendC) {
-        System.out.println("append Character: "  +appendC  +" node: " + currentNode);
+        //System.out.println("append Character: "  +appendC  +" node: " + currentNode);
         currentParentNode = currentNode;
         currentNode = currentNode.next[appendC - 'A'];
         currentWord.append(appendC);

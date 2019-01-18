@@ -25,7 +25,25 @@ public class BoggleSolver {
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
-        return -1;
+        word = word.replace("QU", "Q");
+        switch (word.length()) {
+            case 0:
+            case 1:
+            case 2:
+                return 0;
+            case 3:
+            case 4:
+                return 1;
+            case 5:
+                return 2;
+            case 6:
+                return 3;
+            case 7:
+                return 5;
+            case 8:
+                return 11;
+        }
+        return 11;
     }
 
     private TreeSet<String> iterateBoard(BoggleBoard board) {
@@ -50,7 +68,7 @@ public class BoggleSolver {
 
     private void checkNode(int row, int col, BoggleBoard board, BoggleDictTries dictTries) {
         //TODO do QU here.
-        System.out.println("Check node: " + row + "; " + col);
+        //System.out.println("Check node: " + row + "; " + col);
         dictTries.appendCharacter(board.getLetter(row, col));
         existingPosList.add(new IntPair(row, col));
         if (dictTries.isCurrentAWordMatch()) {
@@ -63,7 +81,7 @@ public class BoggleSolver {
         // Continue search if there still possible
         if (dictTries.stillHasPostfix()) {
             for (IntPair nearbyPos : getNearbyPos(row, col, board.rows(), board.cols())) {
-                System.out.println("Nearby Pos: " + nearbyPos.x + "; " + nearbyPos.y);
+                //System.out.println("Nearby Pos: " + nearbyPos.x + "; " + nearbyPos.y);
                 if (!existingPosList.contains(nearbyPos)) {
                     checkNode(nearbyPos.x, nearbyPos.y, board, dictTries);
                 }
