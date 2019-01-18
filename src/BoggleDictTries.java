@@ -1,5 +1,3 @@
-import edu.princeton.cs.algs4.TrieST;
-
 public class BoggleDictTries {
     // Just store the English alphabet.
     // no space or other symbols.
