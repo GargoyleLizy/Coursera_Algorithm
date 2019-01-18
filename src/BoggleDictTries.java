@@ -59,7 +59,7 @@ public class BoggleDictTries {
         if (x == null) return null;
         if (d == key.length()) return x;
         char c = key.charAt(d);
-        return get(x.next[c], key, d + 1);
+        return get(x.next[c-'A'], key, d + 1);
     }
 
     private Node currentParentNode;
