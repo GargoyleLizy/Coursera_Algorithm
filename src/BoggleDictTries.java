@@ -47,7 +47,12 @@ public class BoggleDictTries {
      */
     public boolean contains(String key) {
         if (key == null) throw new IllegalArgumentException("argument to contains() is null");
-        return get(key) != null;
+        Node keynode = get(key);
+        if(keynode == null){
+            return false;
+        }else{
+            return keynode.isAnEnd;
+        }
     }
 
     private Node get(String word) {
