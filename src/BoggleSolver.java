@@ -1,4 +1,9 @@
-import java.util.*;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+
+import java.util.LinkedList;
+import java.util.TreeSet;
+
 
 public class BoggleSolver {
 
@@ -45,20 +50,22 @@ public class BoggleSolver {
 
     private void checkNode(int row, int col, BoggleBoard board, BoggleDictTries dictTries) {
         //TODO do QU here.
+        System.out.println("Check node: " + row + "; " + col);
         dictTries.appendCharacter(board.getLetter(row, col));
         existingPosList.add(new IntPair(row, col));
         if (dictTries.isCurrentAWordMatch()) {
             String matchedWord = dictTries.getMatchedWord();
             // Only put long enough word into valid set.
-            if(isWordValid(matchedWord)){
+            if (isWordValid(matchedWord)) {
                 validWords.add(dictTries.getMatchedWord());
             }
         }
         // Continue search if there still possible
         if (dictTries.stillHasPostfix()) {
             for (IntPair nearbyPos : getNearbyPos(row, col, board.rows(), board.cols())) {
+                System.out.println("Nearby Pos: " + nearbyPos.x + "; " + nearbyPos.y);
                 if (!existingPosList.contains(nearbyPos)) {
-                    checkNode(row, col, board, dictTries);
+                    checkNode(nearbyPos.x, nearbyPos.y, board, dictTries);
                 }
             }
         }
@@ -68,7 +75,7 @@ public class BoggleSolver {
     }
 
     private Iterable<IntPair> getNearbyPos(int row, int col, int rowNumber, int colNumber) {
-        ArrayList<IntPair> nearbyPos = new ArrayList<>();
+        LinkedList<IntPair> nearbyPos = new LinkedList<>();
         if (row > 0) {
             nearbyPos.add(new IntPair(row - 1, col));
         }
@@ -122,7 +129,16 @@ public class BoggleSolver {
         }
     }
 
-    public static void main(String[] args){
-
+    public static void main(String[] args) {
+        In in = new In(args[0]);
+        String[] dictionary = in.readAllStrings();
+        BoggleSolver solver = new BoggleSolver(dictionary);
+        BoggleBoard board = new BoggleBoard(args[1]);
+        int score = 0;
+        for (String word : solver.getAllValidWords(board)) {
+            StdOut.println(word);
+            score += solver.scoreOf(word);
+        }
+        StdOut.println("Score = " + score);
     }
 }

@@ -16,7 +16,7 @@ public class BoggleDictTries {
     }
 
     public BoggleDictTries() {
-
+        root = new Node();
     }
 
     // Insert a word into the dictionary.
@@ -91,15 +91,18 @@ public class BoggleDictTries {
 
     // Try expand the existing string
     public void appendCharacter(char appendC) {
-        currentNode = currentNode.next[appendC - 'A'];
+        System.out.println("append Character: "  +appendC  +" node: " + currentNode);
         currentParentNode = currentNode;
+        currentNode = currentNode.next[appendC - 'A'];
         currentWord.append(appendC);
     }
 
     // No more possible answers, step back to last state.
     public void stepBack() {
         currentNode = currentParentNode;
-        currentParentNode = currentNode.parent;
+        if(currentNode!=null){
+            currentParentNode = currentNode.parent;
+        }
         currentWord.replace(currentWord.length() - 1, currentWord.length(), "");
     }
 
