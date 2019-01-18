@@ -138,7 +138,6 @@ public class BoggleSolver {
 
     // Check if word long enough
     private boolean isWordValid(String word) {
-        word = word.replace("QU", "Q");
         return word.length() > 2;
     }
 
