@@ -1,4 +1,4 @@
-/******************************************************************************
+package part_two.week4; /******************************************************************************
  *  Compilation:  javac BoggleBoard.java
  *  Execution:    java  BoggleBoard
  *  Dependencies: StdRandom.java In.java StdOut.java

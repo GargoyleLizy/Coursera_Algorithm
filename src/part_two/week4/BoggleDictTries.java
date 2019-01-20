@@ -1,3 +1,5 @@
+package part_two.week4;
+
 public class BoggleDictTries {
     // Just store the English alphabet.
     // no space or other symbols.
