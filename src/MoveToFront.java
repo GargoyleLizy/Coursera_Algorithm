@@ -16,6 +16,7 @@ public class MoveToFront {
             input[i] = encodeProcess(input[i]);
             BinaryStdOut.write(input[i]);
         }
+        BinaryStdOut.close();
     }
 
     // apply move-to-front decoding, reading from standard input and writing to standard output
@@ -27,6 +28,7 @@ public class MoveToFront {
             input[i] = decodeProcess(input[i]);
             BinaryStdOut.write(input[i]);
         }
+        BinaryStdOut.close();
     }
 
     // if args[0] is '-', apply move-to-front encoding
